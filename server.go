@@ -21,6 +21,9 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  16,
 	WriteBufferSize: maxMessageSize,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 var (
@@ -44,6 +47,9 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ws, err := upgrader.Upgrade(w, r, nil)
+		log.Println(ws)
+		log.Println(r)
+
 		if err != nil {
 			return
 		}
@@ -77,8 +83,8 @@ func handleConnection(ws *websocket.Conn, channel string) {
 		select {
 		case <-t.C:
 			message = []byte(`Pong`)
-			if err := ws.WriteMessage(websocket.PongMessage, nil); err != nil {
-				return
+			if err := ws.WriteMessage(websocket.PingMessage, []byte(`9`)); err != nil {
+				break
 			}
 		case message = <-sub:
 		}
